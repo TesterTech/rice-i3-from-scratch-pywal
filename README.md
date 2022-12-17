@@ -10,4 +10,5 @@ Code for the YT video: https://youtu.be/NZZg76LBbbA
 - imagemagick
 - pywal (after install, make sure to put ~/.local/bin on your path!) https://github.com/dylanaraps/pywal
 
-### Note: the dirs with prefixed ```dot_``` in the name refer to the hidden dirs ```.config``` and  ```.local``` in your home directory.
+### Note
+- The dirs with prefixed ```dot_``` in the name refer to the hidden dirs ```.config``` and  ```.local``` in your home directory.
