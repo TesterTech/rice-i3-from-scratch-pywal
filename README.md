@@ -7,6 +7,7 @@ Code for the YT video: https://youtu.be/NZZg76LBbbA
 - Rofi 
 - Dunst 
 - Polybar 
+- imagemagick
 - pywal (after install, make sure to put ~/.local/bin on your path!) https://github.com/dylanaraps/pywal
 
 ### Note: the dir dot_config refers to the hidden dir .config in your home directory.
