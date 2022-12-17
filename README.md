@@ -9,4 +9,4 @@ Code for the YT video: https://youtu.be/NZZg76LBbbA
 - Polybar
 - pywal
 
-- Note: the dir dot_config refers to the hidden dir .config in your home directory.
+### Note: the dir dot_config refers to the hidden dir .config in your home directory.
