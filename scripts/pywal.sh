@@ -31,8 +31,8 @@ change_color() {
 	  primary: ${AC1};
 	  secondary: ${AC2};
 	  background-alt: ${AC3};
-	  foreground-alt: ${AC4}
-	  foreground-alt2: ${AC5}
+	  foreground-alt: ${AC4};
+	  foreground-alt2: ${AC5};
 	}
 	EOF
 
