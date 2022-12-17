@@ -1,0 +1,93 @@
+/*
+ *
+ * Author  : Aditya Shakya
+ * Mail    : adi1090x@gmail.com
+ * Github  : @adi1090x
+ * Twitter : @adi1090x
+ *
+ */
+
+
+prompt {
+    enabled: 						true;
+	padding: 						10px;
+	background-color: 				@background-alt;
+	text-color: 					@primary;
+	font:							"Iosevka Nerd Font 10";
+}
+
+entry {
+    background-color:               @background;
+    text-color:                     @primary;
+    placeholder-color:              @foreground;
+    expand:                         true;
+    horizontal-align:               0;
+    placeholder:                    "Search...";
+    padding:                        10px 10px 10px 0px;
+    border-radius:                  0px;
+    blink:                          true;
+}
+
+inputbar {
+	children: 						[ prompt, entry ];
+    background-color:               @primary;
+    text-color:                     @foreground;
+    expand:                         false;
+	border:							0px 0px 1px 0px;
+    border-radius:                  0px;
+	border-color:					@ac;
+    spacing:                        0px;
+}
+
+listview {
+    background-color:               @background;
+    padding:                        0px;
+    columns:                        1;
+    lines:                          5;
+    spacing:                        5px;
+    cycle:                          true;
+    dynamic:                        true;
+    layout:                         vertical;
+}
+
+mainbox {
+    background-color:               @background;
+	border:							0px;
+    border-radius:                  0px;
+	border-color:					@primary;
+    children:                       [ inputbar, listview ];
+    spacing:                       	10px;
+    padding:                        2px 10px 10px 10px;
+}
+
+element {
+    background-color:               @background;
+    text-color:                     @foreground;
+    orientation:                    horizontal;
+    border-radius:                  0px;
+    padding:                        8px;
+}
+
+element-icon {
+    background-color:               transparent;
+    text-color:               		inherit;
+    size:                           24px;
+    border:                         0px;
+}
+
+element-text {
+    background-color:               transparent;
+    text-color:               		inherit;
+    expand:                         true;
+    horizontal-align:               0;
+    vertical-align:                 0.5;
+    margin:                         0px 2.5px 0px 2.5px;
+}
+
+element selected {
+    background-color:               @background-alt;
+    text-color:                     @foreground-alt;
+	border:							0px 0px 0px 0px;
+    border-radius:                  0px;
+    border-color:                  	@primary;
+}

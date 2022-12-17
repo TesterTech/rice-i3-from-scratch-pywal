@@ -1,0 +1,6 @@
+* {
+    bg1:      #0b2330;
+    border-color:    #d1dfd4;
+    text-color:      #f7f5e4;
+    font:            "JetBrains Mono NL SemiBold 14";
+}

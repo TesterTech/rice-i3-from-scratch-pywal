@@ -1,0 +1,30 @@
+/*
+ *
+ * Author  : Aditya Shakya
+ * Mail    : adi1090x@gmail.com
+ * Github  : @adi1090x
+ * Twitter : @adi1090x
+ *
+ */
+
+@import "colors.rasi"
+@import "config.rasi"
+@import "launcher_base.rasi"
+
+configuration {
+    sidebar-mode: false;
+}
+
+window {
+    transparency:               "real";
+    background-color:           @background;
+    text-color:                 @foreground;
+    border:			            2px;
+    border-color:		        @primary;
+    border-radius:              0px;
+    width:			            600px;
+    location:                   center;
+    x-offset:                   0;
+    y-offset:                   0;
+}
+
