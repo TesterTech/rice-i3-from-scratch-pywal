@@ -2,7 +2,7 @@
 
 # Color files
 POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini"
-ROFI_FILE="$HOME/.config/polybar/hack/scripts/rofi/colors.rasi"
+ROFI_FILE="$HOME/.config/rofi/colors.rasi"
 WAL_FILE="$HOME/.cache/wal/colors.sh"
 
 # Get colors
@@ -13,9 +13,13 @@ pywal_get() {
 # Change colors
 change_color() {
 	# polybar
-	sed -i -e "s/background = #.*/background = $BG/g" $POLYBAR_FILE
 	sed -i -e "s/foreground = #.*/foreground = $FG/g" $POLYBAR_FILE
-	sed -i -e "s/primary = #.*/primary = $AC/g" $POLYBAR_FILE
+	sed -i -e "s/background = #.*/background = $BG/g" $POLYBAR_FILE
+	sed -i -e "s/primary = #.*/primary = $AC1/g" $POLYBAR_FILE
+	sed -i -e "s/secondary = #.*/secondary = $AC2/g" $POLYBAR_FILE
+	sed -i -e "s/background-alt = #.*/background-alt = $AC3/g" $POLYBAR_FILE
+	sed -i -e "s/foreground-alt = #.*/foreground-alt = $AC4/g" $POLYBAR_FILE
+	sed -i -e "s/foreground-alt2 = #.*/foreground-alt2 = $AC5/g" $POLYBAR_FILE
 
 	# rofi
 	cat > $ROFI_FILE <<- EOF
@@ -23,11 +27,12 @@ change_color() {
 
 	* {
 	  foreground: ${FG};
-	  foreground-alt: ${AC4}
 	  background: ${BG};
 	  primary: ${AC1};
 	  secondary: ${AC2};
 	  background-alt: ${AC3};
+	  foreground-alt: ${AC4}
+	  foreground-alt2: ${AC5}
 	}
 	EOF
 
@@ -41,7 +46,6 @@ set_wallpaper_using_feh() {
 
 copy_konsole_colorscheme() {
     echo Copy Konsole colorscheme to 'home local share'
-    mkdir -p $HOME/.local/share/konsole
     cp -f $HOME/.cache/wal/colors-konsole.colorscheme $HOME/.local/share/konsole/pywal.colorscheme
 }
 
@@ -64,9 +68,10 @@ if [[ -x "`which wal`" ]]; then
 		BG=`printf "%s\n" "$background"`
 		FG=`printf "%s\n" "$foreground"`
 		AC1=`printf "%s\n" "$color1"`
-		AC2=`printf "%s\n" "$color1"`
-		AC3=`printf "%s\n" "$color1"`
-		AC4=`printf "%s\n" "$color1"`
+		AC2=`printf "%s\n" "$color2"`
+		AC3=`printf "%s\n" "$color3"`
+		AC4=`printf "%s\n" "$color4"`
+		AC5=`printf "%s\n" "$color5"`
 
 		change_color
 		set_wallpaper_using_feh "$1"
