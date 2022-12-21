@@ -7,13 +7,13 @@
  *
  */
 
-@import "colors.rasi"
 @import "config.rasi"
+@import "colors.rasi"
 @import "launcher_base.rasi"
 
-configuration {
-    sidebar-mode: false;
-}
+//configuration {
+//    sidebar-mode: false;
+//}
 
 window {
     transparency:               "real";
