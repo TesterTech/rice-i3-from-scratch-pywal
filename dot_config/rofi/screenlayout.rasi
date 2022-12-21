@@ -1,7 +1,7 @@
 /* Confirm Dialog */
 
-@import "colors.rasi"
 @import "config.rasi"
+@import "colors.rasi"
 @import "launcher_base.rasi"
 
 * {
