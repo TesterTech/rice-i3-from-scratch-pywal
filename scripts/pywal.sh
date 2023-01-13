@@ -4,6 +4,7 @@
 POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini"
 ROFI_FILE="$HOME/.config/rofi/colors.rasi"
 WAL_FILE="$HOME/.cache/wal/colors.sh"
+KONSOLE_FILE="$HOME/.local/share/konsole/pywal.colorscheme"
 
 # Get colors
 pywal_get() {
@@ -20,6 +21,7 @@ change_color() {
 	sed -i -e "s/background-alt = #.*/background-alt = $AC3/g" $POLYBAR_FILE
 	sed -i -e "s/foreground-alt = #.*/foreground-alt = $AC4/g" $POLYBAR_FILE
 	sed -i -e "s/foreground-alt2 = #.*/foreground-alt2 = $AC5/g" $POLYBAR_FILE
+	sed -i -e "s/foreground-alt3 = #.*/foreground-alt3 = $AC6/g" $POLYBAR_FILE
 
 	# rofi
 	cat > $ROFI_FILE <<- EOF
@@ -33,6 +35,7 @@ change_color() {
 	  background-alt: ${AC3};
 	  foreground-alt: ${AC4};
 	  foreground-alt2: ${AC5};
+	  foreground-alt3: ${AC6};
 	}
 	EOF
 
@@ -46,7 +49,12 @@ set_wallpaper_using_feh() {
 
 copy_konsole_colorscheme() {
     echo Copy Konsole colorscheme to 'home local share'
-    cp -f $HOME/.cache/wal/colors-konsole.colorscheme $HOME/.local/share/konsole/pywal.colorscheme
+    cp -f $HOME/.cache/wal/colors-konsole.colorscheme $KONSOLE_FILE
+    echo and set transparency to 20%
+    sed -i -e "s/Opacity=.*/Opacity=0.8/g" $KONSOLE_FILE
+}
+merge_xresources_color() {
+    xrdb -merge $HOME/.Xresources
 }
 
 # Main
@@ -72,10 +80,13 @@ if [[ -x "`which wal`" ]]; then
 		AC3=`printf "%s\n" "$color3"`
 		AC4=`printf "%s\n" "$color4"`
 		AC5=`printf "%s\n" "$color5"`
+		AC6=`printf "%s\n" "$color6"`
 
 		change_color
 		set_wallpaper_using_feh "$1"
 		copy_konsole_colorscheme
+		merge_xresources_color
+
 	else
 		echo -e "[!] Please enter the path to wallpaper. \n"
 		echo "Usage : ./pywal.sh path/to/image"
