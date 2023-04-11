@@ -5,6 +5,8 @@ POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini"
 ROFI_FILE="$HOME/.config/rofi/colors.rasi"
 WAL_FILE="$HOME/.cache/wal/colors.sh"
 KONSOLE_FILE="$HOME/.local/share/konsole/pywal.colorscheme"
+PLASMA_COLORS_DIR="$HOME/.local/share/color-schemes/"
+PLASMA_COLORS_FILE="PywalColorScheme.colors"
 
 # Get colors
 pywal_get() {
@@ -43,18 +45,138 @@ change_color() {
 }
 
 set_wallpaper_using_feh() {
-    echo Set the wallpaper "$1" using feh
+    echo >> Set the wallpaper "$1" using feh
     feh --bg-fill "$1"
 }
 
 copy_konsole_colorscheme() {
-    echo Copy Konsole colorscheme to 'home local share'
+    echo >> Copy Konsole colorscheme to 'home local share'
     cp -f $HOME/.cache/wal/colors-konsole.colorscheme $KONSOLE_FILE
-    echo and set transparency to 20%
+    echo >> and set transparency to 20%
     sed -i -e "s/Opacity=.*/Opacity=0.8/g" $KONSOLE_FILE
 }
 merge_xresources_color() {
-    xrdb -merge $HOME/.Xresources
+    xrdb -merge $HOME/.cache/wal/colors.Xresources
+}
+get_xres_rgb() {
+	hex=$(xrdb -query | grep "$1" | awk '{print $2}' | cut -d# -f2)
+	printf "%d,%d,%d\n" "0x${hex:0:2}" "0x${hex:2:2}" "0x${hex:4:2}"
+}
+plasma_color_scheme() {
+
+	[[ -d "$PLASMA_COLORS_DIR" ]] || mkdir -pv "$PLASMA_COLORS_DIR"
+
+	output="$(cat << THEME
+[ColorEffects:Disabled]
+Color=$(get_xres_rgb color8:)
+ColorAmount=0.15
+ColorEffect=0
+ContrastAmount=0.250
+ContrastEffect=1
+IntensityAmount=0
+IntensityEffect=1
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=false
+Color=$(get_xres_rgb color8:)
+ColorAmount=0.25
+ColorEffect=0
+ContrastAmount=0.15
+ContrastEffect=1
+Enable=false
+IntensityAmount=0.20
+
+[Colors:Button]
+BackgroundNormal=$(get_xres_rgb background:)
+ForegroundNormal=$(get_xres_rgb foreground:)
+BackgroundAlternate=80,80,80
+DecorationFocus=96,128,160
+DecorationHover=144,168,192
+ForegroundActive=148,190,201
+ForegroundInactive=116,136,174
+ForegroundLink=$(get_xres_rgb color5:)
+ForegroundNegative=191,8,11
+ForegroundNeutral=192,144,0
+ForegroundPositive=0,137,43
+ForegroundVisited=100,74,155
+
+[Colors:Selection]
+BackgroundAlternate=$(get_xres_rgb color6:)
+BackgroundNormal=$(get_xres_rgb color6:)
+DecorationFocus=180,113,31
+DecorationHover=180,113,31
+ForegroundActive=132,67,101
+ForegroundInactive=255,232,115
+ForegroundLink=44,27,0
+ForegroundNegative=200,62,76
+ForegroundNeutral=$(get_xres_rgb foreground:)
+ForegroundNormal=$(get_xres_rgb foreground:)
+ForegroundPositive=255,162,0
+ForegroundVisited=144,112,140
+
+
+[Colors:Tooltip]
+BackgroundAlternate=186,200,216
+BackgroundNormal=192,206,224
+DecorationFocus=$(get_xres_rgb color5:)
+DecorationHover=$(get_xres_rgb color5:)
+ForegroundActive=148,190,201
+ForegroundInactive=116,136,174
+ForegroundLink=$(get_xres_rgb color5:)
+ForegroundNegative=191,3,3
+ForegroundNeutral=192,144,0
+ForegroundNormal=52,56,61
+ForegroundPositive=0,137,43
+ForegroundVisited=100,74,155
+
+[Colors:View]
+BackgroundAlternate=$(get_xres_rgb color8:)
+BackgroundNormal=$(get_xres_rgb color8:)
+DecorationFocus=$(get_xres_rgb color5:)
+DecorationHover=$(get_xres_rgb color5:)
+ForegroundActive=140,140,140
+ForegroundInactive=140,140,140
+ForegroundLink=$(get_xres_rgb color3:)
+ForegroundNegative=$(get_xres_rgb color8:)
+ForegroundNeutral=$(get_xres_rgb color0:)
+ForegroundNormal=$(get_xres_rgb color0:)
+ForegroundPositive=0,137,43
+ForegroundVisited=100,74,155
+
+[Colors:Window]
+BackgroundAlternate=114,114,114
+BackgroundNormal=100,100,100
+DecorationFocus=$(get_xres_rgb color5:)
+DecorationHover=$(get_xres_rgb color5:)
+ForegroundActive=148,190,201
+ForegroundInactive=116,136,174
+ForegroundLink=$(get_xres_rgb color5:)
+ForegroundNegative=191,3,3
+ForegroundNeutral=192,144,0
+ForegroundNormal=0,0,0
+ForegroundPositive=0,137,43
+ForegroundVisited=100,74,155
+
+[General]
+ColorScheme=Pywal Color Scheme
+Name=PywalColorScheme
+shadeSortColumn=true
+
+[KDE]
+contrast=4
+
+[WM]
+activeBackground=$(get_xres_rgb background:)
+activeBlend=255,255,255
+activeForeground=$(get_xres_rgb foreground:)
+inactiveBackground=$(get_xres_rgb background:)
+inactiveBlend=75,71,67
+inactiveForeground=$(get_xres_rgb color15:)
+THEME
+)"
+
+	printf '%s' "$output" > "${PLASMA_COLORS_DIR}${PLASMA_COLORS_FILE}"
+	echo ">> Generated KDE theme: ${PLASMA_COLORS_DIR}${PLASMA_COLORS_FILE}"
 }
 
 # Main
@@ -85,7 +207,8 @@ if [[ -x "`which wal`" ]]; then
 		change_color
 		set_wallpaper_using_feh "$1"
 		copy_konsole_colorscheme
-		merge_xresources_color
+		#merge_xresources_color
+		plasma_color_scheme
 
 	else
 		echo -e "[!] Please enter the path to wallpaper. \n"
