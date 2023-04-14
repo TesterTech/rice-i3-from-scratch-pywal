@@ -226,12 +226,17 @@ for_window [title="^.*Mozilla Firefox"] border pixel 1
 for_window [title="- IntelliJ IDEA"] border pixel 0
 for_window [title="^.*CopyQ"] floating enable; border none 
 
-# color for window border i3 windows 
-# class                 border  backgr. text    indicator child_border
-client.focused          #333333 #43CEBE #ffffff #2e9ef4   #285577
-client.focused_inactive #333333 #5f676a #ffffff #484e50   #5f676a
-client.unfocused        #333333 #222222 #888888 #292d2e   #222222
-client.urgent           #2f343a #900000 #ffffff #900000   #900000
-client.placeholder      #000000 #0c0c0c #ffffff #000000   #0c0c0c
-client.background       #222222
+set_from_resource $bg_act i3wm.color1 #333333
+set_from_resource $bg_inact i3wm.color0 #333333
+set_from_resource $fg_txt i3wm.color0 #333333
+set_from_resource $fg_inact_txt i3wm.color1 #333333
+set_from_resource $background i3wm.color9 #333333
 
+# color for window border i3 windows
+# class                 border      backgr.     text        indicator     child_border
+client.focused          #333333     $bg_act     $fg_txt     #2e9ef4       #285577
+client.focused_inactive #333333     $bg_inact   $fg_inact_txt #484e50     #5f676a
+client.unfocused        #333333     #222222     #888888     #292d2e       #222222
+client.urgent           #2f343a     #900000     #ffffff     #900000       #900000
+client.placeholder      #000000     #0c0c0c     #ffffff     #000000       #0c0c0c
+client.background       $background
