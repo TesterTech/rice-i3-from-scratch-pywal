@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# This is a Pywal wrapper script that is shown in TesterTech's YT video's
+# Free to use it for your own workflow. No guarantees given on proper operation.
+# ~ Script source ~
+# https://github.com/TesterTech/rice-i3-from-scratch-pywal
+#
+# YT: https://www.youtube.com/@testertech
+# GH: https://github.com/testertech
+
 
 # Color files
 POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini"
@@ -7,6 +15,7 @@ WAL_FILE="$HOME/.cache/wal/colors.sh"
 KONSOLE_FILE="$HOME/.local/share/konsole/pywal.colorscheme"
 PLASMA_COLORS_DIR="$HOME/.local/share/color-schemes/"
 PLASMA_COLORS_FILE="PywalColorScheme.colors"
+PLASMA_SHELL_EXECUTABLE="plasmashell"
 
 # Get colors
 pywal_get() {
@@ -45,14 +54,14 @@ change_color() {
 }
 
 set_wallpaper_using_feh() {
-    echo >> Set the wallpaper "$1" using feh
+    echo ">> Set the wallpaper "$1" using feh"
     feh --bg-fill "$1"
 }
 
 copy_konsole_colorscheme() {
-    echo >> Copy Konsole colorscheme to 'home local share'
+    echo ">> Copy Konsole colorscheme to 'home local share'"
     cp -f $HOME/.cache/wal/colors-konsole.colorscheme $KONSOLE_FILE
-    echo >> and set transparency to 20%
+    echo ">> and set transparency to 20%"
     sed -i -e "s/Opacity=.*/Opacity=0.8/g" $KONSOLE_FILE
 }
 merge_xresources_color() {
@@ -177,6 +186,9 @@ THEME
 
 	printf '%s' "$output" > "${PLASMA_COLORS_DIR}${PLASMA_COLORS_FILE}"
 	echo ">> Generated KDE theme: ${PLASMA_COLORS_DIR}${PLASMA_COLORS_FILE}"
+	echo ">> Apply using Plasma builtin: plasma-apply-colorscheme  ${PLASMA_COLORS_FILE}"
+	plasma-apply-colorscheme BreezeDark # needs to be toggled... so first BreezeDark
+	plasma-apply-colorscheme PywalColorScheme # then the updated one
 }
 
 # Main
@@ -208,7 +220,12 @@ if [[ -x "`which wal`" ]]; then
 		set_wallpaper_using_feh "$1"
 		copy_konsole_colorscheme
 		#merge_xresources_color
-		plasma_color_scheme
+		if [[ -x "`which ${PLASMA_SHELL_EXECUTABLE}`" ]];
+		then
+			plasma_color_scheme
+		else
+			echo "ERROR plasmashell: cannot is NOT installed! Cannot set plasma's (kde) color scheme"
+		fi
 
 	else
 		echo -e "[!] Please enter the path to wallpaper. \n"
@@ -217,3 +234,4 @@ if [[ -x "`which wal`" ]]; then
 else
 	echo "[!] 'pywal' is not installed. https://pypi.org/project/pywal/"
 fi
+
