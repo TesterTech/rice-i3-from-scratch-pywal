@@ -127,12 +127,22 @@ def color_button_grid():
     colors = subprocess.getstatusoutput("xrdb -q | grep *.color")
     color_blob = colors[1]
     color_dict = create_color_dict(color_blob)
-    print(color_dict)
+    # print(color_dict)
     label_row = 8
+    item_num = 1
+    column_num = 0
+    col_span = 1
     for key, value in color_dict.items():
-        label = Label(root, text=f"{key}", background=f"{value}", pady=4)
-        label.grid(row=label_row, column=0, columnspan=5)
+        if item_num == 7:
+            column_num = 1
+            label_row = 8
+        if item_num == 13:
+            column_num = 2
+            label_row = 8
+        button = Button(root, text=f"{key}", background=f"{value}", pady=10, padx=10)
+        button.grid(row=label_row, column=column_num, columnspan=col_span)
         label_row = label_row + 1
+        item_num = item_num + 1
 
 
 if __name__ == "__main__":
@@ -143,7 +153,7 @@ if __name__ == "__main__":
     root.config(bg="lightgrey", pady=20, padx=20)
 
     add_images_to_list()
-    image_on_grid = Label(text="Image Browser Bruh", height=15, width=50)
+    image_on_grid = Label(text="Pywal Image Browser", height=15, width=50)
     image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
     button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state=["disabled"])
     button_exit = Button(root, text="Exit", command=root.quit)
