@@ -3,11 +3,10 @@
 # This is a WIP! Tested on openSUSE 15.4 with Python 3.10
 # uses tkinter to render the gui.
 import os
-from tkinter import Button, Label, Tk
 import subprocess
+from tkinter import Button, Label, Tk
 
 from PIL import ImageTk, Image
-from tkinter import filedialog as fd
 
 TEXT_LABEL_FORWARD = " >> "
 TEXT_LABEL_BACK = " << "
@@ -41,13 +40,13 @@ def prep_move(img_no):
 def forward(image_number):
     prep_move(image_number)
     if image_number == 1:
-        button_back = Button(root, text=TEXT_LABEL_BACK, state=["disabled"])
+        button_back = Button(root, text=TEXT_LABEL_BACK, state="disabled")
     else:
         button_back = Button(
             root, text=TEXT_LABEL_BACK, command=lambda: back(image_number - 1)
         )
     if image_number == len(List_of_images):
-        button_forward = Button(root, text=TEXT_LABEL_FORWARD, state=["disabled"])
+        button_forward = Button(root, text=TEXT_LABEL_FORWARD, state="disabled")
     else:
         button_forward = Button(
             root, text=TEXT_LABEL_FORWARD, command=lambda: forward(image_number + 1)
@@ -63,7 +62,7 @@ def back(img_number):
         root, text=TEXT_LABEL_FORWARD, command=lambda: forward(img_number + 1)
     )
     if img_number == 1:
-        button_back = Button(root, text=TEXT_LABEL_BACK, state=["disabled"])
+        button_back = Button(root, text=TEXT_LABEL_BACK, state="disabled")
     else:
         button_back = Button(
             root, text=TEXT_LABEL_BACK, command=lambda: back(img_number - 1)
@@ -95,21 +94,30 @@ def add_images_to_list():
             res.append(path)
     List_of_images = []
     List_of_original_images = []
+    scale_and_crop_images(List_of_images, List_of_original_images, res)
+
+
+def scale_and_crop_images(List_of_images, List_of_original_images, res):
     for image_name in res:
         # print(f'found {image_name} in wall dir. ')
-        reduce_factor = 2  # default
         image_1 = Image.open(WALLPAPERS_DIR + image_name)
-        if image_1.width <= 1024:
-            reduce_factor = 1
-        if 1999 < image_1.width < 4080:
-            reduce_factor = 4
-        if image_1.width >= 4080 or image_1.height > 2999:
-            reduce_factor = 6
+        reduce_factor = determine_scale_factor(image_1)
         low_res_image = ImageTk.PhotoImage(image_1.reduce(reduce_factor))
         low_res_image_1 = ImageTk.getimage(low_res_image)
         low_res_image = low_res_image_1.crop((0, 0, 800, 500))
         List_of_images.append(ImageTk.PhotoImage(low_res_image))
         List_of_original_images.append(image_1)
+
+
+def determine_scale_factor(image_1):
+    reduce_factor = 2  # default
+    if image_1.width <= 1024:
+        reduce_factor = 1
+    if 1999 < image_1.width < 4080:
+        reduce_factor = 4
+    if image_1.width >= 4080 or image_1.height > 2999:
+        reduce_factor = 6
+    return reduce_factor
 
 
 def create_color_dict(color_string):
@@ -122,10 +130,9 @@ def create_color_dict(color_string):
 
 
 def color_button_grid():
-    colors = subprocess.getstatusoutput("xrdb -q | grep *.color")
+    colors = get_colors_from_xrdb()
     color_blob = colors[1]
     color_dict = create_color_dict(color_blob)
-    # print(color_dict)
     label_row = 8
     item_num = 1
     column_num = 0
@@ -143,6 +150,11 @@ def color_button_grid():
         item_num = item_num + 1
 
 
+def get_colors_from_xrdb():
+    colors = subprocess.getstatusoutput("xrdb -q | grep *.color")
+    return colors
+
+
 if __name__ == "__main__":
     root = Tk()
     root.tk.call("tk", "scaling", 4.0)
@@ -153,7 +165,7 @@ if __name__ == "__main__":
     add_images_to_list()
     image_on_grid = Label(text="Pywal Image Browser", height=15, width=50)
     image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
-    button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state=["disabled"])
+    button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state="disabled")
     button_exit = Button(root, text="Exit", command=root.quit)
     button_forward = Button(root, text=TEXT_LABEL_FORWARD, command=lambda: forward(1))
     button_pywal = Button(root, text="Pywal", command=lambda: run_wal_on_image(img_no))
