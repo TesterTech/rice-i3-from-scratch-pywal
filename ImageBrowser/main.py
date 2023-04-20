@@ -16,18 +16,9 @@ HOME = os.path.expanduser("~")
 WALLPAPERS_DIR = f"{HOME}/Pictures/Wallpapers/"
 
 
-def select_file() -> str:
-    filetypes = (("All files", "*.*"),)
-    filename = fd.askopenfilename(
-        title="Open a file", initialdir=WALLPAPERS_DIR, filetypes=filetypes
-    )
-    return filename
-
-
 def set_current_image_nr(image_nmbr):
     global img_no
     img_no = image_nmbr
-    print(f"set the image no {img_no}")
 
 
 def prep_move(img_no):
@@ -36,16 +27,14 @@ def prep_move(img_no):
     global button_back
     global button_exit
     global button_colors
-    set_current_image_nr(img_no - 1)
 
+    set_current_image_nr(img_no - 1)
     image_on_grid.grid_forget()
     image_on_grid = Label(
         image=List_of_images[img_no - 1]
     )  # this puts the image on the grid.
     text_label = Label(text=f"Image {img_no} of {len(List_of_images)}")
-    text_label_image_meta = Label(text=f"h: {List_of_images[img_no].height()} w: {List_of_images[img_no].width()} ")
     text_label.grid(row=2, column=0)
-    text_label_image_meta.grid(row=2, column=1)
     image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
 
 
@@ -63,7 +52,9 @@ def forward(image_number):
         button_forward = Button(
             root, text=TEXT_LABEL_FORWARD, command=lambda: forward(image_number + 1)
         )
-    place_buttons_in_grid(button_back, button_exit, button_forward, button_pywal, button_colors)
+    place_buttons_in_grid(
+        button_back, button_exit, button_forward, button_pywal, button_colors
+    )
 
 
 def back(img_number):
@@ -77,22 +68,22 @@ def back(img_number):
         button_back = Button(
             root, text=TEXT_LABEL_BACK, command=lambda: back(img_number - 1)
         )
-    place_buttons_in_grid(button_back, button_exit, button_forward, button_pywal, button_colors)
+    place_buttons_in_grid(
+        button_back, button_exit, button_forward, button_pywal, button_colors
+    )
 
 
 def run_wal_on_image(img_no):
     filename = List_of_original_images[img_no].filename
-    print(f"run pywal on image: {filename}")
     subprocess.run([f"{HOME}/scripts/pywal.sh", f"{filename}"])
 
 
 def place_buttons_in_grid(btn_back, btn_exit, btn_forward, btn_pywal, btn_colors):
-    button_browse_files.grid(row=1, column=0, padx=20, pady=20)
-    btn_forward.grid(row=1, column=1)
-    btn_back.grid(row=1, column=2)
-    btn_pywal.grid(row=1, column=3)
-    btn_exit.grid(row=1, column=4)
-    btn_colors.grid(row=1, column=5)
+    btn_forward.grid(row=1, column=0)
+    btn_back.grid(row=1, column=1)
+    btn_pywal.grid(row=1, column=2)
+    btn_exit.grid(row=1, column=3)
+    btn_colors.grid(row=1, column=4)
 
 
 def add_images_to_list():
@@ -105,20 +96,27 @@ def add_images_to_list():
     List_of_images = []
     List_of_original_images = []
     for image_name in res:
-        reduce_factor = 4  # default
+        # print(f'found {image_name} in wall dir. ')
+        reduce_factor = 2  # default
         image_1 = Image.open(WALLPAPERS_DIR + image_name)
-        if image_1.width > 3999 or image_1.height > 2999:
-            reduce_factor = 8
+        if image_1.width <= 1024:
+            reduce_factor = 1
+        if 1999 < image_1.width < 4080:
+            reduce_factor = 4
+        if image_1.width >= 4080 or image_1.height > 2999:
+            reduce_factor = 6
         low_res_image = ImageTk.PhotoImage(image_1.reduce(reduce_factor))
+        low_res_image_1 = ImageTk.getimage(low_res_image)
+        low_res_image = low_res_image_1.crop((0, 0, 800, 500))
+        List_of_images.append(ImageTk.PhotoImage(low_res_image))
         List_of_original_images.append(image_1)
-        List_of_images.append(low_res_image)
 
 
 def create_color_dict(color_string):
     color_dict = {}
-    for line in color_string.split('\n'):
-        if line.strip() != '':
-            key, value = line.split(':')
+    for line in color_string.split("\n"):
+        if line.strip() != "":
+            key, value = line.split(":")
             color_dict[key.strip()] = value.strip()
     return color_dict
 
@@ -158,9 +156,10 @@ if __name__ == "__main__":
     button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state=["disabled"])
     button_exit = Button(root, text="Exit", command=root.quit)
     button_forward = Button(root, text=TEXT_LABEL_FORWARD, command=lambda: forward(1))
-    button_browse_files = Button(root, text="Open a File", command=select_file)
     button_pywal = Button(root, text="Pywal", command=lambda: run_wal_on_image(img_no))
     button_colors = Button(root, text="get colors", command=lambda: color_button_grid())
-    place_buttons_in_grid(button_back, button_exit, button_forward, button_pywal, button_colors)
+    place_buttons_in_grid(
+        button_back, button_exit, button_forward, button_pywal, button_colors
+    )
 
     root.mainloop()
