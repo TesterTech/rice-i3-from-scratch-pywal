@@ -153,16 +153,16 @@ ForegroundPositive=0,137,43
 ForegroundVisited=100,74,155
 
 [Colors:Window]
-BackgroundAlternate=114,114,114
-BackgroundNormal=100,100,100
-DecorationFocus=$(get_xres_rgb color5:)
+BackgroundAlternate=$(get_xres_rgb color6:)
+BackgroundNormal=$(get_xres_rgb color5:)
+DecorationFocus=$(get_xres_rgb color6:)
 DecorationHover=$(get_xres_rgb color5:)
 ForegroundActive=148,190,201
 ForegroundInactive=116,136,174
 ForegroundLink=$(get_xres_rgb color5:)
 ForegroundNegative=191,3,3
 ForegroundNeutral=192,144,0
-ForegroundNormal=0,0,0
+ForegroundNormal=$(get_xres_rgb color66:)
 ForegroundPositive=0,137,43
 ForegroundVisited=100,74,155
 

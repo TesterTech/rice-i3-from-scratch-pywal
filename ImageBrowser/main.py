@@ -157,7 +157,7 @@ def get_colors_from_xrdb():
 
 if __name__ == "__main__":
     root = Tk()
-    root.tk.call("tk", "scaling", 4.0)
+    root.tk.call("tk", "scaling", 2.0) # https://www.tcl.tk/man/tcl8.6/TkCmd/tk.html#M10
     root.title("Pywal Image Browser")
     root.geometry("1200x700")
     root.config(bg="lightgrey", pady=20, padx=20)
