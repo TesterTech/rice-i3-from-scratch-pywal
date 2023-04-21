@@ -15,12 +15,12 @@ HOME = os.path.expanduser("~")
 WALLPAPERS_DIR = f"{HOME}/Pictures/Wallpapers/"
 
 
-def set_current_image_nr(image_nmbr):
+def set_current_image_nr(image_nmbr: int):
     global img_no
     img_no = image_nmbr
 
 
-def prep_move(img_no):
+def prep_move(img_no: int):
     global image_on_grid
     global button_forward
     global button_back
@@ -37,7 +37,7 @@ def prep_move(img_no):
     image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
 
 
-def forward(image_number):
+def forward(image_number: int):
     prep_move(image_number)
     if image_number == 1:
         button_back = Button(root, text=TEXT_LABEL_BACK, state="disabled")
@@ -56,7 +56,7 @@ def forward(image_number):
     )
 
 
-def back(img_number):
+def back(img_number: int):
     prep_move(img_number)
     button_forward = Button(
         root, text=TEXT_LABEL_FORWARD, command=lambda: forward(img_number + 1)
@@ -72,12 +72,18 @@ def back(img_number):
     )
 
 
-def run_wal_on_image(img_no):
+def run_wal_on_image(img_no: int):
     filename = List_of_original_images[img_no].filename
     subprocess.run([f"{HOME}/scripts/pywal.sh", f"{filename}"])
 
 
-def place_buttons_in_grid(btn_back, btn_exit, btn_forward, btn_pywal, btn_colors):
+def place_buttons_in_grid(
+    btn_back: Button,
+    btn_exit: Button,
+    btn_forward: Button,
+    btn_pywal: Button,
+    btn_colors: Button,
+):
     btn_forward.grid(row=1, column=0)
     btn_back.grid(row=1, column=1)
     btn_pywal.grid(row=1, column=2)
@@ -97,7 +103,9 @@ def add_images_to_list():
     scale_and_crop_images(List_of_images, List_of_original_images, res)
 
 
-def scale_and_crop_images(List_of_images, List_of_original_images, res):
+def scale_and_crop_images(
+    List_of_images: list, List_of_original_images: list, res: list
+):
     for image_name in res:
         # print(f'found {image_name} in wall dir. ')
         image_1 = Image.open(WALLPAPERS_DIR + image_name)
@@ -109,7 +117,7 @@ def scale_and_crop_images(List_of_images, List_of_original_images, res):
         List_of_original_images.append(image_1)
 
 
-def determine_scale_factor(image_1):
+def determine_scale_factor(image_1: ImageTk) -> int:
     reduce_factor = 2  # default
     if image_1.width <= 1024:
         reduce_factor = 1
@@ -120,7 +128,7 @@ def determine_scale_factor(image_1):
     return reduce_factor
 
 
-def create_color_dict(color_string):
+def create_color_dict(color_string: str) -> dict:
     color_dict = {}
     for line in color_string.split("\n"):
         if line.strip() != "":
@@ -150,14 +158,16 @@ def color_button_grid():
         item_num = item_num + 1
 
 
-def get_colors_from_xrdb():
+def get_colors_from_xrdb() -> tuple:
     colors = subprocess.getstatusoutput("xrdb -q | grep *.color")
     return colors
 
 
 if __name__ == "__main__":
     root = Tk()
-    root.tk.call("tk", "scaling", 2.0) # https://www.tcl.tk/man/tcl8.6/TkCmd/tk.html#M10
+    root.tk.call(
+        "tk", "scaling", 2.0
+    )  # https://www.tcl.tk/man/tcl8.6/TkCmd/tk.html#M10
     root.title("Pywal Image Browser")
     root.geometry("1200x700")
     root.config(bg="lightgrey", pady=20, padx=20)
