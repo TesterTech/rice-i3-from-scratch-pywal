@@ -97,10 +97,18 @@ def add_images_to_list():
     res = []
     for path in os.listdir(WALLPAPERS_DIR):
         if os.path.isfile(os.path.join(WALLPAPERS_DIR, path)):
-            res.append(path)
+            if not check_if_svg(path):
+                res.append(path)
     List_of_images = []
     List_of_original_images = []
     scale_and_crop_images(List_of_images, List_of_original_images, res)
+
+
+def check_if_svg(file_name: str) -> bool:
+    if file_name.lower().endswith(('.svg')):
+        return True
+    else:
+        return False
 
 
 def scale_and_crop_images(
