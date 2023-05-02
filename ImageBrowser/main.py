@@ -1,18 +1,29 @@
-# Simple GUI experiment. This is just an image browser atm.
-# Expects images to be there ar $HOME/Pictures/Wallpapers
-# This is a WIP! Tested on openSUSE 15.4 with Python 3.10
-# uses tkinter to render the gui.
+"""
+A simple image browser GUI. With the option of running
+Pywal on an image and showing the xrdb colors.
+Expects images to be there at $HOME/Pictures/Wallpapers
+directory. This is a WIP! Tested on openSUSE 15.4,
+Fedora 38 with Python 3.10 should work on most distro's.
+Uses tkinter to render the GUI. Uses pillow for image parsing.
+Subprocess is used to run shell scripts.
+source: https://github.com/TesterTech
+"""
 import os
 import subprocess
 from tkinter import Button, Label, Tk
-
 from PIL import ImageTk, Image
 
 TEXT_LABEL_FORWARD = " >> "
 TEXT_LABEL_BACK = " << "
-
 HOME = os.path.expanduser("~")
 WALLPAPERS_DIR = f"{HOME}/Pictures/Wallpapers/"
+PYWAL_SCRIPT_LOCATION = f"{HOME}/scripts/pywal.sh"
+THUMB_CROP_SIZE = (0, 0, 200, 125)
+PREVIEW_CROP_SIZE = (0, 0, 800, 500)
+img_no = 0
+List_of_images = []
+List_of_thumbnail_images = []
+List_of_original_images = []
 
 
 def set_current_image_nr(image_nmbr: int):
@@ -21,23 +32,32 @@ def set_current_image_nr(image_nmbr: int):
 
 
 def prep_move(img_no: int):
-    global image_on_grid
+    """
+    This function is run before move to next or previous image.
+    It puts puts some elements on the grid like buttons and image labels.
+    """
+    global selected_image
     global button_forward
     global button_back
     global button_exit
     global button_colors
 
     set_current_image_nr(img_no - 1)
-    image_on_grid.grid_forget()
-    image_on_grid = Label(
+    image_x_of_y_label = Label(text=f"Image {img_no} of {len(List_of_images)}")
+    selected_image.grid_forget()
+    selected_image = Label(
         image=List_of_images[img_no - 1]
     )  # this puts the image on the grid.
-    text_label = Label(text=f"Image {img_no} of {len(List_of_images)}")
-    text_label.grid(row=2, column=0)
-    image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
+    next_image = Label(image=List_of_thumbnail_images[img_no])
+    previous_image = Label(image=List_of_thumbnail_images[img_no - 2])
+    image_x_of_y_label.grid(row=2, column=0)
+    previous_image.grid(row=3, column=0, columnspan=4, rowspan=1, padx=20, pady=20)
+    selected_image.grid(row=4, column=0, columnspan=4, rowspan=1, padx=20, pady=20)
+    next_image.grid(row=5, column=0, columnspan=4, rowspan=1, padx=20, pady=20)
 
 
 def forward(image_number: int):
+    """forward button, pass the image number as argument"""
     prep_move(image_number)
     if image_number == 1:
         button_back = Button(root, text=TEXT_LABEL_BACK, state="disabled")
@@ -57,6 +77,7 @@ def forward(image_number: int):
 
 
 def back(img_number: int):
+    """back button, pass the image number as argument"""
     prep_move(img_number)
     button_forward = Button(
         root, text=TEXT_LABEL_FORWARD, command=lambda: forward(img_number + 1)
@@ -73,8 +94,11 @@ def back(img_number: int):
 
 
 def run_wal_on_image(img_no: int):
+    """run the pywal script on the image
+    :parameter img_no will get the image at index from the List of images
+    """
     filename = List_of_original_images[img_no].filename
-    subprocess.run([f"{HOME}/scripts/pywal.sh", f"{filename}"])
+    subprocess.run([PYWAL_SCRIPT_LOCATION, f"{filename}"])
 
 
 def place_buttons_in_grid(
@@ -87,42 +111,57 @@ def place_buttons_in_grid(
     btn_forward.grid(row=1, column=0)
     btn_back.grid(row=1, column=1)
     btn_pywal.grid(row=1, column=2)
-    btn_exit.grid(row=1, column=3)
-    btn_colors.grid(row=1, column=4)
+    btn_colors.grid(row=1, column=3)
+    btn_exit.grid(row=1, column=5)
 
 
 def add_images_to_list():
     global List_of_images
+    global List_of_thumbnail_images
     global List_of_original_images
     res = []
     for path in os.listdir(WALLPAPERS_DIR):
         if os.path.isfile(os.path.join(WALLPAPERS_DIR, path)):
             if not check_if_svg(path):
                 res.append(path)
-    List_of_images = []
-    List_of_original_images = []
-    scale_and_crop_images(List_of_images, List_of_original_images, res)
+    scale_and_crop_images(
+        List_of_images, List_of_original_images, List_of_thumbnail_images, res
+    )
 
 
 def check_if_svg(file_name: str) -> bool:
-    if file_name.lower().endswith(('.svg')):
-        return True
-    else:
-        return False
+    return bool(file_name.lower().endswith((".svg")))
 
 
 def scale_and_crop_images(
-    List_of_images: list, List_of_original_images: list, res: list
+    list_of_preview_images: list,
+    list_of_original_images: list,
+    list_of_thumbnail_images: list,
+    res: list,
 ):
     for image_name in res:
         # print(f'found {image_name} in wall dir. ')
-        image_1 = Image.open(WALLPAPERS_DIR + image_name)
-        reduce_factor = determine_scale_factor(image_1)
-        low_res_image = ImageTk.PhotoImage(image_1.reduce(reduce_factor))
-        low_res_image_1 = ImageTk.getimage(low_res_image)
-        low_res_image = low_res_image_1.crop((0, 0, 800, 500))
-        List_of_images.append(ImageTk.PhotoImage(low_res_image))
-        List_of_original_images.append(image_1)
+        image_from_disk = Image.open(WALLPAPERS_DIR + image_name)
+        reduce_factor = determine_scale_factor(image_from_disk)
+        preview_image = reduce_photoimage(image_from_disk, reduce_factor)
+        thumbnail_image = reduce_photoimage(image_from_disk, reduce_factor * 4)
+
+        preview_image = crop_image(preview_image, PREVIEW_CROP_SIZE)
+        thumbnail_image = crop_image(thumbnail_image, THUMB_CROP_SIZE)
+
+        list_of_original_images.append(image_from_disk)
+        list_of_preview_images.append(ImageTk.PhotoImage(preview_image))
+        list_of_thumbnail_images.append(ImageTk.PhotoImage(thumbnail_image))
+
+
+def crop_image(_preview_image, preview_crop_size: tuple) -> ImageTk.PhotoImage:
+    tmp_image_1 = ImageTk.getimage(_preview_image)
+    return tmp_image_1.crop(preview_crop_size)
+
+
+def reduce_photoimage(image_from_disk, reduce_factor):
+    preview_image = ImageTk.PhotoImage(image_from_disk.reduce(reduce_factor))
+    return preview_image
 
 
 def determine_scale_factor(image_1: ImageTk) -> int:
@@ -181,13 +220,13 @@ if __name__ == "__main__":
     root.config(bg="lightgrey", pady=20, padx=20)
 
     add_images_to_list()
-    image_on_grid = Label(text="Pywal Image Browser", height=15, width=50)
-    image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
-    button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state="disabled")
-    button_exit = Button(root, text="Exit", command=root.quit)
+    selected_image = Label(text="Pywal Image Browser", height=15, width=50)
+    selected_image.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
     button_forward = Button(root, text=TEXT_LABEL_FORWARD, command=lambda: forward(1))
+    button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state="disabled")
     button_pywal = Button(root, text="Pywal", command=lambda: run_wal_on_image(img_no))
     button_colors = Button(root, text="get colors", command=lambda: color_button_grid())
+    button_exit = Button(root, text="Exit", command=root.quit)
     place_buttons_in_grid(
         button_back, button_exit, button_forward, button_pywal, button_colors
     )
