@@ -21,6 +21,7 @@ PYWAL_SCRIPT_LOCATION = f"{HOME}/scripts/pywal.sh"
 THUMB_CROP_SIZE = (0, 0, 200, 125)
 PREVIEW_CROP_SIZE = (0, 0, 800, 500)
 img_no = 0
+img_no_max = 99
 List_of_images = []
 List_of_thumbnail_images = []
 List_of_original_images = []
@@ -28,13 +29,14 @@ List_of_original_images = []
 
 def set_current_image_nr(image_nmbr: int):
     global img_no
+    print(f'global image number is {image_nmbr}')
     img_no = image_nmbr
 
 
 def prep_move(img_no: int):
     """
     This function is run before move to next or previous image.
-    It puts puts some elements on the grid like buttons and image labels.
+    It puts some elements on the grid like buttons and image labels.
     """
     global selected_image
     global button_forward
@@ -48,7 +50,11 @@ def prep_move(img_no: int):
     selected_image = Label(
         image=List_of_images[img_no - 1]
     )  # this puts the image on the grid.
-    next_image = Label(image=List_of_thumbnail_images[img_no])
+    print(f'img max is {img_no_max} and img no is {img_no}')
+    if img_no_max == img_no:
+        next_image = Label(image=List_of_thumbnail_images[img_no - 1])
+    else:
+        next_image = Label(image=List_of_thumbnail_images[img_no])
     previous_image = Label(image=List_of_thumbnail_images[img_no - 2])
     image_x_of_y_label.grid(row=2, column=0)
     previous_image.grid(row=3, column=0, columnspan=4, rowspan=1, padx=20, pady=20)
@@ -116,9 +122,6 @@ def place_buttons_in_grid(
 
 
 def add_images_to_list():
-    global List_of_images
-    global List_of_thumbnail_images
-    global List_of_original_images
     res = []
     for path in os.listdir(WALLPAPERS_DIR):
         if os.path.isfile(os.path.join(WALLPAPERS_DIR, path)):
@@ -139,8 +142,8 @@ def scale_and_crop_images(
     list_of_thumbnail_images: list,
     res: list,
 ):
+    global img_no_max
     for image_name in res:
-        # print(f'found {image_name} in wall dir. ')
         image_from_disk = Image.open(WALLPAPERS_DIR + image_name)
         reduce_factor = determine_scale_factor(image_from_disk)
         preview_image = reduce_photoimage(image_from_disk, reduce_factor)
@@ -152,6 +155,8 @@ def scale_and_crop_images(
         list_of_original_images.append(image_from_disk)
         list_of_preview_images.append(ImageTk.PhotoImage(preview_image))
         list_of_thumbnail_images.append(ImageTk.PhotoImage(thumbnail_image))
+
+        img_no_max = len(list_of_original_images)
 
 
 def crop_image(_preview_image, preview_crop_size: tuple) -> ImageTk.PhotoImage:
