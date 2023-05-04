@@ -1,5 +1,8 @@
 # rice-i3-from-scratch-pywal
-Code for the YT videos: https://youtu.be/NZZg76LBbbA https://youtu.be/uv2HUeRQJmI https://youtu.be/eAWUwa2xqwA
+Code for the YT videos: 
+- https://youtu.be/NZZg76LBbbA 
+- https://youtu.be/uv2HUeRQJmI 
+- https://youtu.be/eAWUwa2xqwA
 
 ## required software
 - i3-gaps (FYI: used regolith for Ubuntu for this video)
