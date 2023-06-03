@@ -9,7 +9,7 @@
 
 
 # Color files
-POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini"
+POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini" # this is very specific! :(
 ROFI_FILE="$HOME/.config/rofi/colors.rasi"
 WAL_FILE="$HOME/.cache/wal/colors.sh"
 KONSOLE_FILE="$HOME/.local/share/konsole/pywal.colorscheme"
@@ -18,8 +18,21 @@ PLASMA_COLORS_FILE="PywalColorScheme.colors"
 PLASMA_SHELL_EXECUTABLE="plasmashell"
 
 # Get colors
+# standard command for getting pywal
+#    -i is path to image
+#    -q is quiet mode
+#    -t skip changing colors in tty (not sure why this is needed)
+#    --saturate 0.5 fe. would desaturate
+#
+#    -- other fork of pywal --
+#    https://github.com/eylles/pywal16.git
+#    This version has  --cols16
+#
+pywal_get_16() {
+	wal -i "$1" -q --cols16
+}
 pywal_get() {
-	wal -i "$1" -q -t
+	wal -i "$1" -q
 }
 
 # Change colors
@@ -99,8 +112,8 @@ IntensityAmount=0.20
 BackgroundNormal=$(get_xres_rgb background:)
 ForegroundNormal=$(get_xres_rgb foreground:)
 BackgroundAlternate=80,80,80
-DecorationFocus=96,128,160
-DecorationHover=144,168,192
+DecorationFocus=$(get_xres_rgb color13:)
+DecorationHover=$(get_xres_rgb color5:)
 ForegroundActive=148,190,201
 ForegroundInactive=116,136,174
 ForegroundLink=$(get_xres_rgb color5:)
@@ -123,7 +136,6 @@ ForegroundNormal=$(get_xres_rgb foreground:)
 ForegroundPositive=255,162,0
 ForegroundVisited=144,112,140
 
-
 [Colors:Tooltip]
 BackgroundAlternate=186,200,216
 BackgroundNormal=192,206,224
@@ -139,30 +151,30 @@ ForegroundPositive=0,137,43
 ForegroundVisited=100,74,155
 
 [Colors:View]
-BackgroundAlternate=$(get_xres_rgb color8:)
+BackgroundAlternate=$(get_xres_rgb color1:)
 BackgroundNormal=$(get_xres_rgb color8:)
 DecorationFocus=$(get_xres_rgb color5:)
 DecorationHover=$(get_xres_rgb color5:)
 ForegroundActive=140,140,140
 ForegroundInactive=140,140,140
-ForegroundLink=$(get_xres_rgb color3:)
+ForegroundLink=$(get_xres_rgb color13:)
 ForegroundNegative=$(get_xres_rgb color8:)
-ForegroundNeutral=$(get_xres_rgb color0:)
-ForegroundNormal=$(get_xres_rgb color0:)
+ForegroundNeutral=$(get_xres_rgb color15:)
+ForegroundNormal=$(get_xres_rgb color15:)
 ForegroundPositive=0,137,43
 ForegroundVisited=100,74,155
 
 [Colors:Window]
-BackgroundAlternate=$(get_xres_rgb color6:)
-BackgroundNormal=$(get_xres_rgb color5:)
-DecorationFocus=$(get_xres_rgb color6:)
+BackgroundAlternate=$(get_xres_rgb color1:)
+BackgroundNormal=$(get_xres_rgb color8:)
+DecorationFocus=$(get_xres_rgb color5:)
 DecorationHover=$(get_xres_rgb color5:)
 ForegroundActive=148,190,201
 ForegroundInactive=116,136,174
-ForegroundLink=$(get_xres_rgb color5:)
-ForegroundNegative=191,3,3
-ForegroundNeutral=192,144,0
-ForegroundNormal=$(get_xres_rgb color66:)
+ForegroundLink=$(get_xres_rgb color13:)
+ForegroundNegative=$(get_xres_rgb color8:)
+ForegroundNeutral=$(get_xres_rgb color15:)
+ForegroundNormal=$(get_xres_rgb color15:)
 ForegroundPositive=0,137,43
 ForegroundVisited=100,74,155
 
@@ -215,6 +227,16 @@ if [[ -x "`which wal`" ]]; then
 		AC4=`printf "%s\n" "$color4"`
 		AC5=`printf "%s\n" "$color5"`
 		AC6=`printf "%s\n" "$color6"`
+		AC7=`printf "%s\n" "$color7"`
+		AC8=`printf "%s\n" "$color8"`
+		AC9=`printf "%s\n" "$color9"`
+		AC10=`printf "%s\n" "$color10"`
+		AC11=`printf "%s\n" "$color11"`
+		AC12=`printf "%s\n" "$color12"`
+		AC13=`printf "%s\n" "$color13"`
+		AC14=`printf "%s\n" "$color14"`
+		AC15=`printf "%s\n" "$color15"`
+		AC66=`printf "%s\n" "$color66"`
 
 		change_color
 		set_wallpaper_using_feh "$1"
