@@ -13,11 +13,16 @@ if [[ "$1" == "--hack" ]]; then
     polybar -r -q top -c "$dir/hack/config.ini" &
     polybar -r -q bottom -c "$dir/hack/config.ini" &
 
+elif [[ "$1" == "--vallen" ]]; then
+    echo go into Vallen as theme
+    polybar -r -q top -c "$dir/vallen/config.ini" &
+    polybar -r -q bottom -c "$dir/vallen/config.ini" &
+
 else
 	cat <<- EOF
 	Usage : launch.sh --theme
 		
 	Available Themes :
-	--hack    
+	--hack --vallen
 	EOF
 fi
