@@ -22,18 +22,20 @@ PLASMA_SHELL_EXECUTABLE="plasmashell"
 #    -i is path to image
 #    -q is quiet mode
 #    -t skip changing colors in tty (not sure why this is needed)
+#    -n skip setting wallpaper (kde workaropund)
 #    --saturate 0.5 fe. would desaturate
 #
 #    -- other fork of pywal --
-#    https://github.com/eylles/pywal16.git
-#    This version has  --cols16
+  #    https://github.com/eylles/pywal16.git
+  #    This version has  --cols16
 #
-pywal_get_16() {
-	wal -i "$1" -q --cols16
-}
 pywal_get() {
-	wal -i "$1" -q
+  echo ">> wal -i ${1} ${2}"
+	wal -i "$1" -n "$2"
 }
+#pywal_get() {
+#	wal -i "$1" -q
+#}
 
 # Change colors
 change_color() {
@@ -206,7 +208,7 @@ THEME
 # Main
 if [[ -x "`which wal`" ]]; then
 	if [[ "$1" ]]; then
-		pywal_get "$1"
+		pywal_get "$1" "$2"
 
 		# Source the pywal color file
 		if [[ -e "$WAL_FILE" ]]; then
