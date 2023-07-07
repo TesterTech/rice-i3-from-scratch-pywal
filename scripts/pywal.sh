@@ -9,7 +9,6 @@
 
 
 # Color files
-POLYBAR_FILE="$HOME/.config/polybar/hack/colors.ini" # this is very specific! :(
 ROFI_FILE="$HOME/.config/rofi/colors.rasi"
 WAL_FILE="$HOME/.cache/wal/colors.sh"
 KONSOLE_FILE="$HOME/.local/share/konsole/pywal.colorscheme"
@@ -39,20 +38,9 @@ pywal_get() {
 
 # Change colors
 change_color() {
-	# polybar
-	sed -i -e "s/foreground = #.*/foreground = $FG/g" $POLYBAR_FILE
-	sed -i -e "s/background = #.*/background = $BG/g" $POLYBAR_FILE
-	sed -i -e "s/primary = #.*/primary = $AC1/g" $POLYBAR_FILE
-	sed -i -e "s/secondary = #.*/secondary = $AC2/g" $POLYBAR_FILE
-	sed -i -e "s/background-alt = #.*/background-alt = $AC3/g" $POLYBAR_FILE
-	sed -i -e "s/foreground-alt = #.*/foreground-alt = $AC4/g" $POLYBAR_FILE
-	sed -i -e "s/foreground-alt2 = #.*/foreground-alt2 = $AC5/g" $POLYBAR_FILE
-	sed -i -e "s/foreground-alt3 = #.*/foreground-alt3 = $AC6/g" $POLYBAR_FILE
-
 	# rofi
 	cat > $ROFI_FILE <<- EOF
 	/* colors */
-
 	* {
 	  foreground: ${FG};
 	  background: ${BG};
@@ -67,10 +55,14 @@ change_color() {
 
 	polybar-msg cmd restart
 }
-
+Q
 set_wallpaper_using_feh() {
     echo ">> Set the wallpaper "$1" using feh"
     feh --bg-fill "$1"
+}
+set_wallpaper_using_wayland() {
+    echo ">> Set the wallpaper "$1" using swaybg"
+    swaybg -i "$1" -m fill &
 }
 
 copy_konsole_colorscheme() {
@@ -241,7 +233,14 @@ if [[ -x "`which wal`" ]]; then
 		AC66=`printf "%s\n" "$color66"`
 
 		change_color
-		set_wallpaper_using_feh "$1"
+		# wayland?
+		echo "XSession is : $XDG_SESSION_TYPE"
+		if [ "$XDG_SESSION_TYPE" == "wayland" ]
+		then
+		  set_wallpaper_using_wayland "$1"
+		else
+		  set_wallpaper_using_feh "$1"
+		fi
 		copy_konsole_colorscheme
 		#merge_xresources_color
 		if [[ -x "`which ${PLASMA_SHELL_EXECUTABLE}`" ]];
@@ -250,6 +249,7 @@ if [[ -x "`which wal`" ]]; then
 		else
 			echo "ERROR plasmashell: cannot is NOT installed! Cannot set plasma's (kde) color scheme"
 		fi
+		pywalfox update
 
 	else
 		echo -e "[!] Please enter the path to wallpaper. \n"

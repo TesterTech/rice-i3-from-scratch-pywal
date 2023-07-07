@@ -8,7 +8,7 @@
 # To get a config file with the same key positions, but for your current
 # layout, use the i3-config-wizard
 #
-set $HOME /home/<username>
+set $HOME /home/$USER
 set $exe exec --no-startup-id
 set $ROFI_THEMES_FOLDER $HOME/.config/rofi
 font pango:Terminus 10px 
