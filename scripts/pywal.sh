@@ -25,22 +25,22 @@ PLASMA_SHELL_EXECUTABLE="plasmashell"
 #    --saturate 0.5 fe. would desaturate
 #
 #    -- other fork of pywal --
-  #    https://github.com/eylles/pywal16.git
-  #    This version has  --cols16
+#    https://github.com/eylles/pywal16.git
+#    This version has  --cols16
 #
 pywal_get() {
-  echo ">> wal -i ${1} ${2}"
-	wal -i "$1" -n "$2"
+    echo "[func: pywal_get] >> wal -i ${1} ${2}"
+	wal -i "$1" "$2" -n -e
+    echo "[func: pywal_get] >> still here"
+	return 1
 }
-#pywal_get() {
-#	wal -i "$1" -q
-#}
-
 # Change colors
 change_color() {
+
 	# rofi
 	cat > $ROFI_FILE <<- EOF
 	/* colors */
+
 	* {
 	  foreground: ${FG};
 	  background: ${BG};
@@ -53,16 +53,16 @@ change_color() {
 	}
 	EOF
 
-	polybar-msg cmd restart
+	#polybar-msg cmd restart
 }
-Q
+
 set_wallpaper_using_feh() {
-    echo ">> Set the wallpaper "$1" using feh"
-    feh --bg-fill "$1"
-}
-set_wallpaper_using_wayland() {
-    echo ">> Set the wallpaper "$1" using swaybg"
-    swaybg -i "$1" -m fill &
+	if [ $XDG_SESSION_TYPE == "wayland" ]; then
+		echo ">> Session is Wayland"
+	else
+		echo ">> Set the wallpaper "$1" using feh"
+		feh --bg-fill "$1"
+	fi
 }
 
 copy_konsole_colorscheme() {
@@ -146,11 +146,11 @@ ForegroundVisited=100,74,155
 
 [Colors:View]
 BackgroundAlternate=$(get_xres_rgb color1:)
-BackgroundNormal=$(get_xres_rgb color8:)
+BackgroundNormal=$(get_xres_rgb color1:)
 DecorationFocus=$(get_xres_rgb color5:)
 DecorationHover=$(get_xres_rgb color5:)
-ForegroundActive=140,140,140
-ForegroundInactive=140,140,140
+ForegroundActive=$(get_xres_rgb color14:)
+ForegroundInactive=$(get_xres_rgb color12:)
 ForegroundLink=$(get_xres_rgb color13:)
 ForegroundNegative=$(get_xres_rgb color8:)
 ForegroundNeutral=$(get_xres_rgb color15:)
@@ -160,11 +160,11 @@ ForegroundVisited=100,74,155
 
 [Colors:Window]
 BackgroundAlternate=$(get_xres_rgb color1:)
-BackgroundNormal=$(get_xres_rgb color8:)
+BackgroundNormal=$(get_xres_rgb color1:)
 DecorationFocus=$(get_xres_rgb color5:)
 DecorationHover=$(get_xres_rgb color5:)
-ForegroundActive=148,190,201
-ForegroundInactive=116,136,174
+ForegroundActive=$(get_xres_rgb color14:)
+ForegroundInactive=$(get_xres_rgb color12:)
 ForegroundLink=$(get_xres_rgb color13:)
 ForegroundNegative=$(get_xres_rgb color8:)
 ForegroundNeutral=$(get_xres_rgb color15:)
@@ -194,6 +194,7 @@ THEME
 	echo ">> Generated KDE theme: ${PLASMA_COLORS_DIR}${PLASMA_COLORS_FILE}"
 	echo ">> Apply using Plasma builtin: plasma-apply-colorscheme  ${PLASMA_COLORS_FILE}"
 	plasma-apply-colorscheme BreezeDark # needs to be toggled... so first BreezeDark
+	sleep 0.2s
 	plasma-apply-colorscheme PywalColorScheme # then the updated one
 }
 
@@ -233,23 +234,19 @@ if [[ -x "`which wal`" ]]; then
 		AC66=`printf "%s\n" "$color66"`
 
 		change_color
-		# wayland?
-		echo "XSession is : $XDG_SESSION_TYPE"
-		if [ "$XDG_SESSION_TYPE" == "wayland" ]
+		set_wallpaper_using_feh "$1"
+		merge_xresources_color
+		if [ -x "`which ${PLASMA_SHELL_EXECUTABLE}`" ];
 		then
-		  set_wallpaper_using_wayland "$1"
-		else
-		  set_wallpaper_using_feh "$1"
-		fi
-		copy_konsole_colorscheme
-		#merge_xresources_color
-		if [[ -x "`which ${PLASMA_SHELL_EXECUTABLE}`" ]];
-		then
+			echo ">> Plasmashell executable found. "
 			plasma_color_scheme
+			copy_konsole_colorscheme
 		else
 			echo "ERROR plasmashell: cannot is NOT installed! Cannot set plasma's (kde) color scheme"
 		fi
+		sleep 0.1s
 		pywalfox update
+		$HOME/scripts/waybarstart
 
 	else
 		echo -e "[!] Please enter the path to wallpaper. \n"
