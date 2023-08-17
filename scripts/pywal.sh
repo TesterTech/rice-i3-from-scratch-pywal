@@ -58,7 +58,8 @@ change_color() {
 
 set_wallpaper_using_feh() {
 	if [ $XDG_SESSION_TYPE == "wayland" ]; then
-		echo ">> Session is Wayland"
+		echo ">> Set the wallpaper "$1" using swww"
+		swww img "$1"
 	else
 		echo ">> Set the wallpaper "$1" using feh"
 		feh --bg-fill "$1"

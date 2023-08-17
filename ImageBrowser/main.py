@@ -29,15 +29,16 @@ def prep_move(img_no: int):
     global button_exit
     global button_colors
     global checkbox_16_colors
+    global button_info
 
     set_current_image_nr(img_no - 1)
     image_on_grid.grid_forget()
     image_on_grid = Label(
         image=List_of_images[img_no - 1]
     )  # this puts the image on the grid.
-    text_label = Label(text=f"Image {img_no} of {len(List_of_images)}")
-    text_label.grid(row=2, column=0)
-    image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
+    text_label_image_index = Label(text=f"Image {img_no} of {len(List_of_images)}")
+    text_label_image_index.grid(row=2, column=0)
+    image_on_grid.grid(row=3, column=0, columnspan=6, rowspan=3, padx=20, pady=20)
 
 
 def forward(image_number: int):
@@ -54,9 +55,7 @@ def forward(image_number: int):
         button_forward = Button(
             root, text=TEXT_LABEL_FORWARD, command=lambda: forward(image_number + 1)
         )
-    place_buttons_in_grid(
-        button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors
-    )
+    place_buttons_in_grid_function(button_back, button_forward)
 
 
 def back(img_number: int):
@@ -70,8 +69,13 @@ def back(img_number: int):
         button_back = Button(
             root, text=TEXT_LABEL_BACK, command=lambda: back(img_number - 1)
         )
+    place_buttons_in_grid_function(button_back, button_forward)
+
+
+def place_buttons_in_grid_function(button_back, button_forward):
     place_buttons_in_grid(
-        button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors
+        button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors,
+        button_info
     )
 
 
@@ -86,9 +90,9 @@ def run_wal_on_image(img_no: int):
     filename = List_of_original_images[img_no].filename
     print(f'>> Run pywal on {filename} >> {sixteen_colors.get()}')
     if sixteen_colors.get():
-        subprocess.run([f"{HOME}/scripts/pywal.sh", f"{filename}", "--cols16"])
+        subprocess.run(["../scripts/pywal.sh", f"{filename}", "--cols16"])
     else:
-        subprocess.run([f"{HOME}/scripts/pywal.sh", f"{filename}", "-q"])
+        subprocess.run(["../scripts/pywal.sh", f"{filename}", "-q"])
 
 
 def place_buttons_in_grid(
@@ -98,13 +102,15 @@ def place_buttons_in_grid(
         btn_pywal: Button,
         btn_colors: Button,
         chk_16_colors: Checkbutton,
+        btn_info: Button,
 ):
     btn_forward.grid(row=1, column=0)
     btn_back.grid(row=1, column=1)
     btn_pywal.grid(row=1, column=2)
     chk_16_colors.grid(row=1, column=3)
     btn_colors.grid(row=1, column=4)
-    btn_exit.grid(row=1, column=5)
+    btn_info.grid(row=1, column=5)
+    btn_exit.grid(row=1, column=6)
 
 
 def add_images_to_list():
@@ -121,7 +127,7 @@ def add_images_to_list():
 
 
 def check_if_svg(file_name: str) -> bool:
-    if file_name.lower().endswith(('.svg')):
+    if file_name.lower().endswith('.svg'):
         return True
     else:
         return False
@@ -162,9 +168,12 @@ def create_color_dict(color_string: str) -> dict:
 
 
 def color_button_grid():
+    """This function will place the color buttons in a grid."""
     colors = get_colors_from_xrdb()
     color_blob = colors[1]
     color_dict = create_color_dict(color_blob)
+    print(f'>> colordict {color_dict}')
+
     label_row = 8
     item_num = 1
     column_num = 0
@@ -187,6 +196,24 @@ def get_colors_from_xrdb() -> tuple:
     return colors
 
 
+def show_windowing_system() -> str:
+    xdg_session_type = subprocess.getoutput("echo $XDG_SESSION_TYPE")
+    return xdg_session_type
+
+
+def show_wallpaper_changer() -> str:
+    wall_change_progs = subprocess.getoutput("../scripts/wallpaper_changers.sh")
+    return wall_change_progs
+
+
+def show_sys_info():
+    sysinfo = (
+            f"Display Server: {show_windowing_system()}\n\n"
+            f"Wallpaper changers: \n{show_wallpaper_changer()}"
+            )
+    return sysinfo
+
+
 if __name__ == "__main__":
     root = Tk()
     root.tk.call(
@@ -200,9 +227,11 @@ if __name__ == "__main__":
 
     add_images_to_list()
     image_on_grid = Label(text="Pywal Image Browser", height=15, width=50)
-    image_on_grid.grid(row=3, column=0, columnspan=5, rowspan=3, padx=20, pady=20)
+    image_on_grid.grid(row=3, column=0, columnspan=6, rowspan=3, padx=20, pady=20)
     button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state="disabled")
     button_exit = Button(root, text="Exit", command=root.quit)
+    button_info = Button(root, text="Info")
+    Tooltip(button_info, text=show_sys_info(), wraplength=200)
     button_forward = Button(root, text=TEXT_LABEL_FORWARD, command=lambda: forward(1))
     button_pywal = Button(root, text="Pywal", command=lambda: run_wal_on_image(img_no))
     checkbox_16_colors = Checkbutton(root, text='16 colors', variable=sixteen_colors)
@@ -210,7 +239,7 @@ if __name__ == "__main__":
             wraplength=200)
     button_colors = Button(root, text="get colors", command=lambda: color_button_grid())
     place_buttons_in_grid(
-        button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors
+        button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors,
+        button_info
     )
     root.mainloop()
-
