@@ -1,13 +1,13 @@
+"""
 # Simple GUI experiment. This is just an image browser atm.
 # Expects images to be there ar $HOME/Pictures/Wallpapers
 # This is a WIP! Tested on openSUSE 15.4 with Python 3.10
 # uses tkinter to render the gui.
+"""
 import os
 import subprocess
-import time
 from tkinter import Button, Label, Tk, Checkbutton, IntVar
 from PIL import ImageTk, Image
-
 from helpers.TooltipHelper import Tooltip
 
 TEXT_LABEL_FORWARD = " >> "
@@ -18,11 +18,17 @@ WALLPAPERS_DIR = f"{HOME}/Pictures/Wallpapers/"
 
 
 def set_current_image_nr(image_nmbr: int):
+    """The current image index"""
     global img_no
     img_no = image_nmbr
 
 
 def prep_move(img_no: int):
+    """
+    Preparations for moving back or forward an image.
+    Set the current image nr.
+    Rebuild the grid for displaying the gui elements.
+    """
     global image_on_grid
     global button_forward
     global button_back
@@ -38,10 +44,19 @@ def prep_move(img_no: int):
     )  # this puts the image on the grid.
     text_label_image_index = Label(text=f"Image {img_no} of {len(List_of_images)}")
     text_label_image_index.grid(row=2, column=0)
+    get_grid_configuration(image_on_grid)
+
+
+def get_grid_configuration(image_on_grid):
     image_on_grid.grid(row=3, column=0, columnspan=6, rowspan=3, padx=20, pady=20)
 
 
 def forward(image_number: int):
+    """
+    Code that is executed when the next button is pressed.
+    The current image nr is passed into this function.
+    Prep move is always prior to doing anything else.
+    """
     prep_move(image_number)
     if image_number == 1:
         button_back = Button(root, text=TEXT_LABEL_BACK, state="disabled")
@@ -59,6 +74,11 @@ def forward(image_number: int):
 
 
 def back(img_number: int):
+    """
+    Code that is executed when the Back button is pressed.
+    The current image nr is passed into this function.
+    Prep move is always prior to doing anything else.
+    """
     prep_move(img_number)
     button_forward = Button(
         root, text=TEXT_LABEL_FORWARD, command=lambda: forward(img_number + 1)
@@ -134,20 +154,30 @@ def check_if_svg(file_name: str) -> bool:
 
 
 def scale_and_crop_images(
-        List_of_images: list, List_of_original_images: list, res: list
+        list_of_images: list, list_of_original_images: list, res: list
 ):
+    """
+    the list of images and list of original images are passed here.
+    The loi will contain the scaled and cropped ones.
+    The looi will contain as stated.
+    """
     for image_name in res:
-        # print(f'found {image_name} in wall dir. ')
         image_1 = Image.open(WALLPAPERS_DIR + image_name)
         reduce_factor = determine_scale_factor(image_1)
         low_res_image = ImageTk.PhotoImage(image_1.reduce(reduce_factor))
         low_res_image_1 = ImageTk.getimage(low_res_image)
         low_res_image = low_res_image_1.crop((0, 0, 800, 500))
-        List_of_images.append(ImageTk.PhotoImage(low_res_image))
-        List_of_original_images.append(image_1)
+        list_of_images.append(ImageTk.PhotoImage(low_res_image))
+        list_of_original_images.append(image_1)
 
 
 def determine_scale_factor(image_1: ImageTk) -> int:
+    """
+    There are various images sizes, the image preview is fixed.
+    Dependent on the image size an image is resized by a given amount
+    (reduce factor).
+    Could probably be solved more elegantly tbh.
+    """
     reduce_factor = 2  # default
     if image_1.width <= 1024:
         reduce_factor = 1
@@ -159,6 +189,7 @@ def determine_scale_factor(image_1: ImageTk) -> int:
 
 
 def create_color_dict(color_string: str) -> dict:
+    """A dictionary for the current colors to be stored in"""
     color_dict = {}
     for line in color_string.split("\n"):
         if line.strip() != "":
@@ -192,21 +223,34 @@ def color_button_grid():
 
 
 def get_colors_from_xrdb() -> tuple:
+    """Get the colors values from xrdb"""
     colors = subprocess.getstatusoutput("xrdb -q | grep *.color")
     return colors
 
 
 def show_windowing_system() -> str:
+    """Wayland or X11?"""
     xdg_session_type = subprocess.getoutput("echo $XDG_SESSION_TYPE")
     return xdg_session_type
 
 
 def show_wallpaper_changer() -> str:
+    """
+    There are a lot of wallpaper changers.
+    This will scan of some known ones.
+    Can be useful to check if at least one is installed.
+    Also, wallpaper changers depend on a certain display server.
+    F.e. on X11 feh can be used and on Wayland swwww can be.
+    """
     wall_change_progs = subprocess.getoutput("../scripts/wallpaper_changers.sh")
     return wall_change_progs
 
 
 def show_sys_info():
+    """
+    Used for the text hint (Hover) to show some general info like
+    the windowing_system and wallpaper_changer.
+    """
     sysinfo = (
             f"Display Server: {show_windowing_system()}\n\n"
             f"Wallpaper changers: \n{show_wallpaper_changer()}"
@@ -215,6 +259,7 @@ def show_sys_info():
 
 
 if __name__ == "__main__":
+    global sixteen_colors
     root = Tk()
     root.tk.call(
         "tk", "scaling", 1.0
@@ -222,12 +267,11 @@ if __name__ == "__main__":
     root.title("Pywal Image Browser")
     root.geometry("1200x700")
     root.config(bg="lightgrey", pady=20, padx=20)
-    global sixteen_colors
     sixteen_colors = IntVar()
 
     add_images_to_list()
     image_on_grid = Label(text="Pywal Image Browser", height=15, width=50)
-    image_on_grid.grid(row=3, column=0, columnspan=6, rowspan=3, padx=20, pady=20)
+    get_grid_configuration(image_on_grid)
     button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state="disabled")
     button_exit = Button(root, text="Exit", command=root.quit)
     button_info = Button(root, text="Info")
@@ -235,7 +279,8 @@ if __name__ == "__main__":
     button_forward = Button(root, text=TEXT_LABEL_FORWARD, command=lambda: forward(1))
     button_pywal = Button(root, text="Pywal", command=lambda: run_wal_on_image(img_no))
     checkbox_16_colors = Checkbutton(root, text='16 colors', variable=sixteen_colors)
-    Tooltip(checkbox_16_colors, text='*Important*\nOnly works with Pywal (fork) supporting 16 colors!',
+    Tooltip(checkbox_16_colors,
+            text='*Important*\nOnly works with Pywal (fork) supporting 16 colors!',
             wraplength=200)
     button_colors = Button(root, text="get colors", command=lambda: color_button_grid())
     place_buttons_in_grid(
