@@ -9,12 +9,22 @@ import subprocess
 from tkinter import Button, Label, Tk, Checkbutton, IntVar
 from PIL import ImageTk, Image
 from helpers.TooltipHelper import Tooltip
+from tkinter.filedialog import askdirectory
 
 TEXT_LABEL_FORWARD = " >> "
 TEXT_LABEL_BACK = " << "
 
 HOME = os.path.expanduser("~")
-WALLPAPERS_DIR = f"{HOME}/Pictures/Wallpapers/"
+wallpapers_dir = f"{HOME}/Pictures/Wallpapers"
+directory = wallpapers_dir
+
+
+def open_directory(dir=wallpapers_dir) -> str:
+    global directory
+    directory = askdirectory(initialdir=dir)
+    prep_move(0)
+    print(f">> Directory {directory}")
+    add_images_to_list(str(directory))
 
 
 def set_current_image_nr(image_nmbr: int):
@@ -36,14 +46,16 @@ def prep_move(img_no: int):
     global button_colors
     global checkbox_16_colors
     global button_info
+    global directory
 
     set_current_image_nr(img_no - 1)
     image_on_grid.grid_forget()
+    num_images = len(List_of_images)
     image_on_grid = Label(
         image=List_of_images[img_no - 1]
     )  # this puts the image on the grid.
-    text_label_image_index = Label(text=f"Image {img_no} of {len(List_of_images)}")
-    text_label_image_index.grid(row=2, column=0)
+    text_label_image_index = Label(text=f"Dir {directory}. Image {img_no} of {num_images}")
+    text_label_image_index.grid(row=2, column=0, columnspan=5)
     get_grid_configuration(image_on_grid)
 
 
@@ -51,6 +63,7 @@ def get_grid_configuration(image_on_grid):
     image_on_grid.grid(row=3, column=0, columnspan=6, rowspan=3, padx=20, pady=20)
 
 
+# movement functions
 def forward(image_number: int):
     """
     Code that is executed when the next button is pressed.
@@ -92,13 +105,15 @@ def back(img_number: int):
     place_buttons_in_grid_function(button_back, button_forward)
 
 
+# GUI functions
 def place_buttons_in_grid_function(button_back, button_forward):
     place_buttons_in_grid(
         button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors,
-        button_info
+        button_info, button_browse
     )
 
 
+# wal
 def run_wal_on_image(img_no: int):
     """
     Run the image through the wal command with some arguments.
@@ -123,31 +138,35 @@ def place_buttons_in_grid(
         btn_colors: Button,
         chk_16_colors: Checkbutton,
         btn_info: Button,
+        btn_browse: Button,
 ):
-    btn_forward.grid(row=1, column=0)
-    btn_back.grid(row=1, column=1)
-    btn_pywal.grid(row=1, column=2)
-    chk_16_colors.grid(row=1, column=3)
-    btn_colors.grid(row=1, column=4)
-    btn_info.grid(row=1, column=5)
-    btn_exit.grid(row=1, column=6)
+    btn_browse.grid(row=1, column=0)
+    btn_forward.grid(row=1, column=1)
+    btn_back.grid(row=1, column=2)
+    btn_pywal.grid(row=1, column=3)
+    chk_16_colors.grid(row=1, column=4)
+    btn_colors.grid(row=1, column=5)
+    btn_info.grid(row=1, column=6)
+    btn_exit.grid(row=1, column=7)
 
 
-def add_images_to_list():
+def add_images_to_list(directory: str):
     global List_of_images
     global List_of_original_images
     res = []
-    for path in os.listdir(WALLPAPERS_DIR):
-        if os.path.isfile(os.path.join(WALLPAPERS_DIR, path)):
-            if not check_if_svg(path):
+    for path in os.listdir(directory):
+        if os.path.isfile(os.path.join(directory, path)):
+            if not check_if_non_img(path):
+                print(f'> add image to list {path}')
                 res.append(path)
     List_of_images = []
     List_of_original_images = []
     scale_and_crop_images(List_of_images, List_of_original_images, res)
 
 
-def check_if_svg(file_name: str) -> bool:
-    if file_name.lower().endswith('.svg'):
+def check_if_non_img(file_name: str) -> bool:
+    if (file_name.lower().endswith('.svg') or
+            file_name.lower().endswith('.mp4')):
         return True
     else:
         return False
@@ -162,7 +181,7 @@ def scale_and_crop_images(
     The looi will contain as stated.
     """
     for image_name in res:
-        image_1 = Image.open(WALLPAPERS_DIR + image_name)
+        image_1 = Image.open(f'{directory}/{image_name}')
         reduce_factor = determine_scale_factor(image_1)
         low_res_image = ImageTk.PhotoImage(image_1.reduce(reduce_factor))
         low_res_image_1 = ImageTk.getimage(low_res_image)
@@ -252,9 +271,9 @@ def show_sys_info():
     the windowing_system and wallpaper_changer.
     """
     sysinfo = (
-            f"Display Server: {show_windowing_system()}\n\n"
-            f"Wallpaper changers: \n{show_wallpaper_changer()}"
-            )
+        f"Display Server: {show_windowing_system()}\n\n"
+        f"Wallpaper changers: \n{show_wallpaper_changer()}"
+    )
     return sysinfo
 
 
@@ -269,13 +288,14 @@ if __name__ == "__main__":
     root.config(bg="lightgrey", pady=20, padx=20)
     sixteen_colors = IntVar()
 
-    add_images_to_list()
-    image_on_grid = Label(text="Pywal Image Browser", height=15, width=50)
+    add_images_to_list(wallpapers_dir)
+    image_on_grid = Label(text=f"Pywal Image Browser\nDir {directory}", height=15, width=50)
     get_grid_configuration(image_on_grid)
     button_back = Button(root, text=TEXT_LABEL_BACK, command=back, state="disabled")
     button_exit = Button(root, text="Exit", command=root.quit)
     button_info = Button(root, text="Info")
     Tooltip(button_info, text=show_sys_info(), wraplength=200)
+    button_browse = Button(root, text='Browse..', command=lambda: open_directory())
     button_forward = Button(root, text=TEXT_LABEL_FORWARD, command=lambda: forward(1))
     button_pywal = Button(root, text="Pywal", command=lambda: run_wal_on_image(img_no))
     checkbox_16_colors = Checkbutton(root, text='16 colors', variable=sixteen_colors)
@@ -285,6 +305,6 @@ if __name__ == "__main__":
     button_colors = Button(root, text="get colors", command=lambda: color_button_grid())
     place_buttons_in_grid(
         button_back, button_exit, button_forward, button_pywal, button_colors, checkbox_16_colors,
-        button_info
+        button_info, button_browse
     )
     root.mainloop()
