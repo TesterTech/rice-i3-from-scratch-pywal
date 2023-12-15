@@ -11,7 +11,7 @@ Code for the YT videos:
 - Dunst 
 - Polybar 
 - imagemagick
-- pywal (after install, make sure to put ~/.local/bin on your path!) https://github.com/dylanaraps/pywal
+- pywal (after install, make sure to put ~/.local/bin on your path!) [pywal16](https://github.com/eylles/pywal16)
 
 ## references 
 - Original wiki article https://github.com/Airblader/i3/wiki/Building-from-source
